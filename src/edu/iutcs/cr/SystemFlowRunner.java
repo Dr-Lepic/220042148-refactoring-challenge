@@ -27,44 +27,80 @@ public class SystemFlowRunner {
 
             int selectedOperation = mainMenu.showAndSelectOperation();
 
-            if (selectedOperation == 9) {
-                database.saveSystem();
+            boolean shouldExit = handleMainOperation(selectedOperation, database);
+            if (shouldExit) {
                 return;
             }
+        }
+    }
 
-            if (selectedOperation == 1) {
-                System.out.println("\n\n\nAdd new seller");
-                database.getSellers().add(new Seller());
-                promptToViewMainMenu();
-            } else if (selectedOperation == 2) {
-                System.out.println("\n\n\nAdd new customer");
-                database.getBuyers().add(new Buyer());
-                promptToViewMainMenu();
-            } else if (selectedOperation == 3) {
-                System.out.println("\n\n\nAdd new vehicle");
-                addCar();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 4) {
-                System.out.println("\n\n\nInventory list");
-                database.showInventory();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 5) {
-                System.out.println("\n\n\nSeller's list");
-                database.showSellerList();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 6) {
-                System.out.println("\n\n\nCustomer's list");
-                database.showBuyerList();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 7) {
-                System.out.println("\n\n\nCreate order");
-                createOrder();
-            } else if(selectedOperation==8) {
-                System.out.println("\n\n\nInvoice list");
-                database.showInvoices();
-                promptToViewMainMenu();
+    private static boolean handleMainOperation(int selectedOperation, SystemDatabase database) {
+        switch (selectedOperation) {
+            case 1 -> handleAddSeller(database);
+            case 2 -> handleAddBuyer(database);
+            case 3 -> handleAddVehicle();
+            case 4 -> handleViewInventory(database);
+            case 5 -> handleViewSellers(database);
+            case 6 -> handleViewBuyers(database);
+            case 7 -> handleCreateOrder();
+            case 8 -> handleViewInvoices(database);
+            case 9 -> {
+                database.saveSystem();
+                return true;
+            }
+            default -> {
+                return false;
             }
         }
+
+        return false;
+    }
+
+    private static void handleAddSeller(SystemDatabase database) {
+        System.out.println("\n\n\nAdd new seller");
+        database.getSellers().add(new Seller());
+        promptToViewMainMenu();
+    }
+
+    private static void handleAddBuyer(SystemDatabase database) {
+        System.out.println("\n\n\nAdd new customer");
+        database.getBuyers().add(new Buyer());
+        promptToViewMainMenu();
+    }
+
+    private static void handleAddVehicle() {
+        System.out.println("\n\n\nAdd new vehicle");
+        addCar();
+        promptToViewMainMenu();
+    }
+
+    private static void handleViewInventory(SystemDatabase database) {
+        System.out.println("\n\n\nInventory list");
+        database.showInventory();
+        promptToViewMainMenu();
+    }
+
+    private static void handleViewSellers(SystemDatabase database) {
+        System.out.println("\n\n\nSeller's list");
+        database.showSellerList();
+        promptToViewMainMenu();
+    }
+
+    private static void handleViewBuyers(SystemDatabase database) {
+        System.out.println("\n\n\nCustomer's list");
+        database.showBuyerList();
+        promptToViewMainMenu();
+    }
+
+    private static void handleCreateOrder() {
+        System.out.println("\n\n\nCreate order");
+        createOrder();
+    }
+
+    private static void handleViewInvoices(SystemDatabase database) {
+        System.out.println("\n\n\nInvoice list");
+        database.showInvoices();
+        promptToViewMainMenu();
     }
 
     private static void promptToViewMainMenu() {
@@ -99,24 +135,28 @@ public class SystemFlowRunner {
             }
         }
 
-        Vehicle newItem = null;
-
-        if (vehicleType == 1) {
-            System.out.println("\n\nCreate new bus");
-            newItem = new Bus();
-        } else if (vehicleType == 2) {
-            System.out.println("\n\nCreate new car");
-            newItem = new Car();
-        } else if (vehicleType == 3) {
-            System.out.println("\n\nCreate new hatchback");
-            newItem = new Hatchback();
-        } else if (vehicleType == 4) {
-            System.out.println("\n\nCreate new sedan");
-            newItem = new Sedan();
-        } else {
-            System.out.println("\n\nCreate new SUV");
-            newItem = new SUV();
-        }
+        Vehicle newItem = switch (vehicleType) {
+            case 1 -> {
+                System.out.println("\n\nCreate new bus");
+                yield new Bus();
+            }
+            case 2 -> {
+                System.out.println("\n\nCreate new car");
+                yield new Car();
+            }
+            case 3 -> {
+                System.out.println("\n\nCreate new hatchback");
+                yield new Hatchback();
+            }
+            case 4 -> {
+                System.out.println("\n\nCreate new sedan");
+                yield new Sedan();
+            }
+            default -> {
+                System.out.println("\n\nCreate new SUV");
+                yield new SUV();
+            }
+        };
 
         database.getVehicles().add(newItem);
     }
@@ -127,36 +167,54 @@ public class SystemFlowRunner {
         ShoppingCart cart = new ShoppingCart();
 
         while (true) {
-            int selectedOperation = -1;
+            int selectedOperation = showAndSelectOrderOperation(scanner);
 
-            System.out.println("Please enter the type of operation: [1-5]");
-            System.out.println("1. Add new vehicle to cart");
-            System.out.println("2. Remove vehicle from cart");
-            System.out.println("3. View cart");
-            System.out.println("4. Confirm purchase");
-            System.out.println();
-            System.out.println("5. Return to main menu");
-
-            selectedOperation = scanner.nextInt();
-
-            while (selectedOperation < 1 || selectedOperation > 5) {
-                System.out.print("Please select a valid operation: ");
-                selectedOperation = scanner.nextInt();
-            }
-
-            if (selectedOperation == 1) {
-                cart.addItem();
-            } else if (selectedOperation == 2) {
-                cart.removeItem();
-            } else if (selectedOperation == 3) {
-                cart.viewCart();
-            } else if (selectedOperation == 4) {
-                createInvoice(cart);
-                return;
-            } else {
+            boolean shouldReturnToMainMenu = handleOrderOperation(selectedOperation, cart);
+            if (shouldReturnToMainMenu) {
                 return;
             }
         }
+    }
+
+    private static int showAndSelectOrderOperation(Scanner scanner) {
+        int selectedOperation;
+
+        System.out.println("Please enter the type of operation: [1-5]");
+        System.out.println("1. Add new vehicle to cart");
+        System.out.println("2. Remove vehicle from cart");
+        System.out.println("3. View cart");
+        System.out.println("4. Confirm purchase");
+        System.out.println();
+        System.out.println("5. Return to main menu");
+
+        selectedOperation = scanner.nextInt();
+
+        while (selectedOperation < 1 || selectedOperation > 5) {
+            System.out.print("Please select a valid operation: ");
+            selectedOperation = scanner.nextInt();
+        }
+
+        return selectedOperation;
+    }
+
+    private static boolean handleOrderOperation(int selectedOperation, ShoppingCart cart) {
+        switch (selectedOperation) {
+            case 1 -> cart.addItem();
+            case 2 -> cart.removeItem();
+            case 3 -> cart.viewCart();
+            case 4 -> {
+                createInvoice(cart);
+                return true;
+            }
+            case 5 -> {
+                return true;
+            }
+            default -> {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     private static void createInvoice(ShoppingCart cart) {
