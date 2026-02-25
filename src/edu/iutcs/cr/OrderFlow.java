@@ -71,6 +71,11 @@ public class OrderFlow {
         Scanner scanner = new Scanner(System.in);
         SystemDatabase database = SystemDatabase.getInstance();
 
+        if (cart.isEmpty()) {
+            System.out.println("Cart is empty");
+            return;
+        }
+
         Buyer buyer = null;
         Seller seller = null;
 
@@ -94,7 +99,10 @@ public class OrderFlow {
             }
         } while (seller == null);
 
-        Invoice invoice = new Invoice(buyer, seller, cart);
+        System.out.print("Is payment done (true/false): ");
+        boolean paymentDone = scanner.nextBoolean();
+
+        Invoice invoice = cart.checkout(buyer, seller, paymentDone);
         invoice.printInvoice();
         database.getInvoices().add(invoice);
     }

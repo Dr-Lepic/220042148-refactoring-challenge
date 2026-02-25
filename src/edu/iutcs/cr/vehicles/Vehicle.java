@@ -111,8 +111,16 @@ public class Vehicle implements Serializable {
         return available;
     }
 
-    public void setUnavailable() {
+    public boolean canBePurchased() {
+        return available;
+    }
+
+    public void markAsSold() {
         this.available = false;
+    }
+
+    public void setUnavailable() {
+        markAsSold();
     }
 
     @Override

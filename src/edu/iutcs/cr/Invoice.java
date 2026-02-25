@@ -6,7 +6,6 @@ import edu.iutcs.cr.vehicles.Vehicle;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Scanner;
 
 /**
  * @author Raian Rahman
@@ -24,8 +23,7 @@ public class Invoice implements Serializable {
         this.buyer = buyer;
         this.seller = seller;
         this.shoppingCart = shoppingCart;
-        takePayment();
-        markCarAsUnavailable();
+        this.isPaid = false;
         dateTime = LocalDateTime.now();
     }
 
@@ -38,16 +36,26 @@ public class Invoice implements Serializable {
         this.shoppingCart.viewCart();
     }
 
-    public void takePayment() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Is payment done (true/false): ");
-        this.isPaid = scanner.nextBoolean();
+    public void markPaid() {
+        this.isPaid = true;
     }
 
-    private void markCarAsUnavailable() {
+    public void markDue() {
+        this.isPaid = false;
+    }
+
+    public void applyPaymentStatus(boolean paymentDone) {
+        if (paymentDone) {
+            markPaid();
+            return;
+        }
+
+        markDue();
+    }
+
+    public void finalizeSale() {
         for(Vehicle vehicle: shoppingCart.getVehicles()) {
-            vehicle.setUnavailable();
+            vehicle.markAsSold();
         }
     }
 }

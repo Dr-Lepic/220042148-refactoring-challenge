@@ -1,5 +1,7 @@
 package edu.iutcs.cr;
 
+import edu.iutcs.cr.persons.Buyer;
+import edu.iutcs.cr.persons.Seller;
 import edu.iutcs.cr.system.SystemDatabase;
 import edu.iutcs.cr.vehicles.Vehicle;
 
@@ -28,6 +30,39 @@ public class ShoppingCart implements Serializable {
         return this.vehicles;
     }
 
+    public boolean isEmpty() {
+        return vehicles.isEmpty();
+    }
+
+    public boolean addVehicle(Vehicle vehicle) {
+        if (isNull(vehicle) || !vehicle.canBePurchased()) {
+            return false;
+        }
+
+        return vehicles.add(vehicle);
+    }
+
+    public boolean removeVehicleByRegistrationNumber(String registrationNumber) {
+        return vehicles.remove(new Vehicle(registrationNumber));
+    }
+
+    public double getTotalPrice() {
+        double totalPrice = 0;
+
+        for (Vehicle vehicle : vehicles) {
+            totalPrice += vehicle.getPrice();
+        }
+
+        return totalPrice;
+    }
+
+    public Invoice checkout(Buyer buyer, Seller seller, boolean paymentDone) {
+        Invoice invoice = new Invoice(buyer, seller, this);
+        invoice.applyPaymentStatus(paymentDone);
+        invoice.finalizeSale();
+        return invoice;
+    }
+
     public void addItem() {
         Scanner scanner = new Scanner(System.in);
 
@@ -36,25 +71,23 @@ public class ShoppingCart implements Serializable {
 
         Vehicle vehicle = database.findVehicleByRegistrationNumber(registrationNumber);
 
-        if (isNull(vehicle) || !vehicle.isAvailable()) {
+        if (!addVehicle(vehicle)) {
             System.out.println("Vehicle not available");
             return;
         }
-
-        vehicles.add(vehicle);
     }
 
     public void removeItem() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the registration number of the vehicle: ");
         String registrationNumber = scanner.nextLine();
-        vehicles.remove(new Vehicle(registrationNumber));
+        removeVehicleByRegistrationNumber(registrationNumber);
     }
 
     public void viewCart() {
         System.out.println("\n\nShopping cart\n\n");
 
-        if(vehicles.isEmpty()) {
+        if(isEmpty()) {
             System.out.println("Cart is empty");
             return;
         }
