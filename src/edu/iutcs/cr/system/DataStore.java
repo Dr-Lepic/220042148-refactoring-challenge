@@ -15,75 +15,54 @@ import java.util.Set;
  */
 public class DataStore {
 
-    public void saveInvoices(Set<Invoice> invoices) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("invoices.txt"))) {
-            outputStream.writeObject(invoices);
+    private <T> void saveSet(Set<T> data, String fileName) {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName))) {
+            outputStream.writeObject(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private <T> Set<T> loadSet(String fileName) {
+        Set<T> data = new HashSet<>();
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(fileName))) {
+            data = (Set<T>) inputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            saveSet(data, fileName);
+        }
+
+        return data;
+    }
+
+    public void saveInvoices(Set<Invoice> invoices) {
+        saveSet(invoices, "invoices.txt");
     }
 
     public Set<Invoice> loadInvoices() {
-        Set<Invoice> invoices = new HashSet<>();
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("invoices.txt"))) {
-            invoices = (Set<Invoice>) inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            saveInvoices(invoices);
-        }
-        return invoices;
+        return loadSet("invoices.txt");
     }
 
     public void saveBuyers(Set<Buyer> buyers) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("buyers.txt"))) {
-            outputStream.writeObject(buyers);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveSet(buyers, "buyers.txt");
     }
 
     public Set<Buyer> loadBuyers() {
-        Set<Buyer> buyers = new HashSet<>();
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("buyers.txt"))) {
-            buyers = (Set<Buyer>) inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            saveBuyers(buyers);
-        }
-        return buyers;
+        return loadSet("buyers.txt");
     }
 
     public void saveSellers(Set<Seller> sellers) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("sellers.txt"))) {
-            outputStream.writeObject(sellers);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveSet(sellers, "sellers.txt");
     }
 
     public Set<Seller> loadSellers() {
-        Set<Seller> sellers = new HashSet<>();
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("sellers.txt"))) {
-            sellers = (Set<Seller>) inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            saveSellers(sellers);
-        }
-        return sellers;
+        return loadSet("sellers.txt");
     }
 
     public void saveVehicles(Set<Vehicle> vehicles) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("cars.txt"))) {
-            outputStream.writeObject(vehicles);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveSet(vehicles, "cars.txt");
     }
 
     public Set<Vehicle> loadVehicles() {
-        Set<Vehicle> vehicles = new HashSet<>();
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("cars.txt"))) {
-            vehicles = (Set<Vehicle>) inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            saveVehicles(vehicles);
-        }
-        return vehicles;
+        return loadSet("cars.txt");
     }
 }
