@@ -1,5 +1,7 @@
 package edu.iutcs.cr;
 
+import edu.iutcs.cr.menu.MainOperation;
+
 import java.util.Scanner;
 
 /**
@@ -25,16 +27,16 @@ public class MainMenu {
         System.out.println("9. Save System and Exit");
     }
 
-    public int showAndSelectOperation() {
+    public MainOperation showAndSelectOperation() {
         Scanner scanner = new Scanner(System.in);
         showMenu();
-        int selectedOperation = -1;
+        MainOperation selectedOperation = null;
 
-        while(selectedOperation<1 || selectedOperation>9) {
+        while(selectedOperation == null) {
             System.out.print("Enter your choice: ");
-            selectedOperation = scanner.nextInt();
+            selectedOperation = MainOperation.fromChoice(scanner.nextInt());
 
-            if(selectedOperation<1 || selectedOperation>9) {
+            if(selectedOperation == null) {
                 System.out.print("Enter a valid operation: ");
             }
         }

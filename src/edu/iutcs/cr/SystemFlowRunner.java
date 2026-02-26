@@ -1,5 +1,7 @@
 package edu.iutcs.cr;
 
+import edu.iutcs.cr.menu.MainOperation;
+import edu.iutcs.cr.menu.VehicleType;
 import edu.iutcs.cr.persons.Buyer;
 import edu.iutcs.cr.persons.Seller;
 import edu.iutcs.cr.system.SystemDatabase;
@@ -25,7 +27,7 @@ public class SystemFlowRunner {
         while (true) {
             System.out.println("\n\n\n");
 
-            int selectedOperation = mainMenu.showAndSelectOperation();
+            MainOperation selectedOperation = mainMenu.showAndSelectOperation();
 
             boolean shouldExit = handleMainOperation(selectedOperation, database);
             if (shouldExit) {
@@ -34,22 +36,19 @@ public class SystemFlowRunner {
         }
     }
 
-    private static boolean handleMainOperation(int selectedOperation, SystemDatabase database) {
+    private static boolean handleMainOperation(MainOperation selectedOperation, SystemDatabase database) {
         switch (selectedOperation) {
-            case 1 -> handleAddSeller(database);
-            case 2 -> handleAddBuyer(database);
-            case 3 -> handleAddVehicle();
-            case 4 -> handleViewInventory(database);
-            case 5 -> handleViewSellers(database);
-            case 6 -> handleViewBuyers(database);
-            case 7 -> handleCreateOrder();
-            case 8 -> handleViewInvoices(database);
-            case 9 -> {
+            case ADD_SELLER -> handleAddSeller(database);
+            case ADD_BUYER -> handleAddBuyer(database);
+            case ADD_VEHICLE -> handleAddVehicle();
+            case VIEW_INVENTORY -> handleViewInventory(database);
+            case VIEW_SELLERS -> handleViewSellers(database);
+            case VIEW_BUYERS -> handleViewBuyers(database);
+            case ADD_ORDER -> handleCreateOrder();
+            case VIEW_INVOICES -> handleViewInvoices(database);
+            case SAVE_AND_EXIT -> {
                 database.saveSystem();
                 return true;
-            }
-            default -> {
-                return false;
             }
         }
 
@@ -125,12 +124,12 @@ public class SystemFlowRunner {
         System.out.println("4. Sedan");
         System.out.println("5. SUV");
 
-        int vehicleType = -1;
-        while(vehicleType<1 || vehicleType>5) {
+        VehicleType vehicleType = null;
+        while(vehicleType == null) {
             System.out.print("Enter your choice: ");
-            vehicleType = scanner.nextInt();
+            vehicleType = VehicleType.fromChoice(scanner.nextInt());
 
-            if(vehicleType<1 || vehicleType>5) {
+            if(vehicleType == null) {
                 System.out.println("Enter a valid vehicle type!");
             }
         }
