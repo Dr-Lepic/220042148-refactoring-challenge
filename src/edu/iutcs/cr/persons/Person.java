@@ -1,5 +1,7 @@
 package edu.iutcs.cr.persons;
 
+import edu.iutcs.cr.value.EmailAddress;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Scanner;
@@ -12,7 +14,7 @@ public class Person implements Serializable {
 
     private String name;
     private String id;
-    private String email;
+    private EmailAddress email;
 
     public Person() {
         setName();
@@ -59,18 +61,20 @@ public class Person implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return email == null ? null : email.getValue();
     }
 
     public void setEmail() {
         Scanner scanner = new Scanner(System.in);
 
-        while (this.email == null || this.email.isBlank()) {
+        while (this.email == null) {
             System.out.print("Enter email: ");
-            this.email = scanner.nextLine();
+            String input = scanner.nextLine();
 
-            if (email == null || email.isBlank()) {
-                System.out.println("Email is mandatory!");
+            try {
+                this.email = new EmailAddress(input);
+            } catch (IllegalArgumentException ex) {
+                System.out.println(ex.getMessage());
             }
         }
     }

@@ -1,5 +1,8 @@
 package edu.iutcs.cr.vehicles;
 
+import edu.iutcs.cr.value.RegistrationNumber;
+import edu.iutcs.cr.value.VehicleYear;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Scanner;
@@ -12,10 +15,10 @@ public class Vehicle implements Serializable {
 
     private String make;
     private String model;
-    private String year;
+    private VehicleYear year;
     private double price;
     private boolean available;
-    private String registrationNumber;
+    private RegistrationNumber registrationNumber;
 
     public Vehicle() {
         setRegistrationNumber();
@@ -27,21 +30,23 @@ public class Vehicle implements Serializable {
     }
 
     public Vehicle(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
+        this.registrationNumber = new RegistrationNumber(registrationNumber);
     }
 
     public String getRegistrationNumber() {
-        return this.registrationNumber;
+        return this.registrationNumber.getValue();
     }
 
     public void setRegistrationNumber() {
         Scanner scanner = new Scanner(System.in);
-        while (this.registrationNumber == null || registrationNumber.isBlank()) {
+        while (this.registrationNumber == null) {
             System.out.print("Enter registration number: ");
-            this.registrationNumber = scanner.nextLine();
+            String input = scanner.nextLine();
 
-            if (registrationNumber == null || registrationNumber.isBlank()) {
-                System.out.println("Registration number is mandatory!");
+            try {
+                this.registrationNumber = new RegistrationNumber(input);
+            } catch (IllegalArgumentException ex) {
+                System.out.println(ex.getMessage());
             }
         }
     }
@@ -81,18 +86,20 @@ public class Vehicle implements Serializable {
     }
 
     public String getYear() {
-        return year;
+        return year == null ? null : year.toString();
     }
 
     public void setYear() {
         Scanner scanner = new Scanner(System.in);
 
-        while (this.year == null || this.year.isBlank()) {
+        while (this.year == null) {
             System.out.print("Enter year: ");
-            this.year = scanner.nextLine();
+            String input = scanner.nextLine();
 
-            if (year == null || year.isBlank()) {
-                System.out.println("Year is mandatory!");
+            try {
+                this.year = new VehicleYear(input);
+            } catch (IllegalArgumentException ex) {
+                System.out.println(ex.getMessage());
             }
         }
     }
@@ -137,7 +144,7 @@ public class Vehicle implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Vehicle vehicle)) return false;
-        return Objects.equals(this.registrationNumber, vehicle.registrationNumber);
+        return Objects.equals(registrationNumber, vehicle.registrationNumber);
     }
 
     @Override
