@@ -9,7 +9,7 @@ import java.util.Scanner;
  */
 public class Bus extends Vehicle implements Serializable {
 
-    int passengerCapacity;
+    private int passengerCapacity;
 
     public Bus() {
         super();

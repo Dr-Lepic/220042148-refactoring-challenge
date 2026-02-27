@@ -1,9 +1,11 @@
 package edu.iutcs.cr;
 
+import edu.iutcs.cr.menu.MainOperation;
+import edu.iutcs.cr.menu.VehicleType;
 import edu.iutcs.cr.persons.Buyer;
 import edu.iutcs.cr.persons.Seller;
 import edu.iutcs.cr.system.SystemDatabase;
-import edu.iutcs.cr.vehicles.*;
+import edu.iutcs.cr.vehicles.Vehicle;
 
 import java.util.Scanner;
 
@@ -25,46 +27,79 @@ public class SystemFlowRunner {
         while (true) {
             System.out.println("\n\n\n");
 
-            int selectedOperation = mainMenu.showAndSelectOperation();
+            MainOperation selectedOperation = mainMenu.showAndSelectOperation();
 
-            if (selectedOperation == 9) {
-                database.saveSystem();
+            boolean shouldExit = handleMainOperation(selectedOperation, database);
+            if (shouldExit) {
                 return;
             }
+        }
+    }
 
-            if (selectedOperation == 1) {
-                System.out.println("\n\n\nAdd new seller");
-                database.getSellers().add(new Seller());
-                promptToViewMainMenu();
-            } else if (selectedOperation == 2) {
-                System.out.println("\n\n\nAdd new customer");
-                database.getBuyers().add(new Buyer());
-                promptToViewMainMenu();
-            } else if (selectedOperation == 3) {
-                System.out.println("\n\n\nAdd new vehicle");
-                addCar();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 4) {
-                System.out.println("\n\n\nInventory list");
-                database.showInventory();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 5) {
-                System.out.println("\n\n\nSeller's list");
-                database.showSellerList();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 6) {
-                System.out.println("\n\n\nCustomer's list");
-                database.showBuyerList();
-                promptToViewMainMenu();
-            } else if (selectedOperation == 7) {
-                System.out.println("\n\n\nCreate order");
-                createOrder();
-            } else if(selectedOperation==8) {
-                System.out.println("\n\n\nInvoice list");
-                database.showInvoices();
-                promptToViewMainMenu();
+    private static boolean handleMainOperation(MainOperation selectedOperation, SystemDatabase database) {
+        switch (selectedOperation) {
+            case ADD_SELLER -> handleAddSeller(database);
+            case ADD_BUYER -> handleAddBuyer(database);
+            case ADD_VEHICLE -> handleAddVehicle();
+            case VIEW_INVENTORY -> handleViewInventory(database);
+            case VIEW_SELLERS -> handleViewSellers(database);
+            case VIEW_BUYERS -> handleViewBuyers(database);
+            case ADD_ORDER -> handleCreateOrder();
+            case VIEW_INVOICES -> handleViewInvoices(database);
+            case SAVE_AND_EXIT -> {
+                database.saveSystem();
+                return true;
             }
         }
+
+        return false;
+    }
+
+    private static void handleAddSeller(SystemDatabase database) {
+        System.out.println("\n\n\nAdd new seller");
+        database.getSellers().add(new Seller());
+        promptToViewMainMenu();
+    }
+
+    private static void handleAddBuyer(SystemDatabase database) {
+        System.out.println("\n\n\nAdd new customer");
+        database.getBuyers().add(new Buyer());
+        promptToViewMainMenu();
+    }
+
+    private static void handleAddVehicle() {
+        System.out.println("\n\n\nAdd new vehicle");
+        addCar();
+        promptToViewMainMenu();
+    }
+
+    private static void handleViewInventory(SystemDatabase database) {
+        System.out.println("\n\n\nInventory list");
+        database.showInventory();
+        promptToViewMainMenu();
+    }
+
+    private static void handleViewSellers(SystemDatabase database) {
+        System.out.println("\n\n\nSeller's list");
+        database.showSellerList();
+        promptToViewMainMenu();
+    }
+
+    private static void handleViewBuyers(SystemDatabase database) {
+        System.out.println("\n\n\nCustomer's list");
+        database.showBuyerList();
+        promptToViewMainMenu();
+    }
+
+    private static void handleCreateOrder() {
+        System.out.println("\n\n\nCreate order");
+        OrderFlow.createOrder();
+    }
+
+    private static void handleViewInvoices(SystemDatabase database) {
+        System.out.println("\n\n\nInvoice list");
+        database.showInvoices();
+        promptToViewMainMenu();
     }
 
     private static void promptToViewMainMenu() {
@@ -89,105 +124,18 @@ public class SystemFlowRunner {
         System.out.println("4. Sedan");
         System.out.println("5. SUV");
 
-        int vehicleType = -1;
-        while(vehicleType<1 || vehicleType>5) {
+        VehicleType vehicleType = null;
+        while(vehicleType == null) {
             System.out.print("Enter your choice: ");
-            vehicleType = scanner.nextInt();
+            vehicleType = VehicleType.fromChoice(scanner.nextInt());
 
-            if(vehicleType<1 || vehicleType>5) {
+            if(vehicleType == null) {
                 System.out.println("Enter a valid vehicle type!");
             }
         }
 
-        Vehicle newItem = null;
-
-        if (vehicleType == 1) {
-            System.out.println("\n\nCreate new bus");
-            newItem = new Bus();
-        } else if (vehicleType == 2) {
-            System.out.println("\n\nCreate new car");
-            newItem = new Car();
-        } else if (vehicleType == 3) {
-            System.out.println("\n\nCreate new hatchback");
-            newItem = new Hatchback();
-        } else if (vehicleType == 4) {
-            System.out.println("\n\nCreate new sedan");
-            newItem = new Sedan();
-        } else {
-            System.out.println("\n\nCreate new SUV");
-            newItem = new SUV();
-        }
+        Vehicle newItem = VehicleFactory.createFromChoice(vehicleType);
 
         database.getVehicles().add(newItem);
-    }
-
-    private static void createOrder() {
-        Scanner scanner = new Scanner(System.in);
-        SystemDatabase systemDatabase = SystemDatabase.getInstance();
-        ShoppingCart cart = new ShoppingCart();
-
-        while (true) {
-            int selectedOperation = -1;
-
-            System.out.println("Please enter the type of operation: [1-5]");
-            System.out.println("1. Add new vehicle to cart");
-            System.out.println("2. Remove vehicle from cart");
-            System.out.println("3. View cart");
-            System.out.println("4. Confirm purchase");
-            System.out.println();
-            System.out.println("5. Return to main menu");
-
-            selectedOperation = scanner.nextInt();
-
-            while (selectedOperation < 1 || selectedOperation > 5) {
-                System.out.print("Please select a valid operation: ");
-                selectedOperation = scanner.nextInt();
-            }
-
-            if (selectedOperation == 1) {
-                cart.addItem();
-            } else if (selectedOperation == 2) {
-                cart.removeItem();
-            } else if (selectedOperation == 3) {
-                cart.viewCart();
-            } else if (selectedOperation == 4) {
-                createInvoice(cart);
-                return;
-            } else {
-                return;
-            }
-        }
-    }
-
-    private static void createInvoice(ShoppingCart cart) {
-        Scanner scanner = new Scanner(System.in);
-        SystemDatabase database = SystemDatabase.getInstance();
-
-        Buyer buyer = null;
-        Seller seller = null;
-
-        do {
-            System.out.print("Enter buyer id: ");
-            String buyerId = scanner.nextLine();
-            buyer = database.findBuyerById(buyerId);
-
-            if (buyer == null) {
-                System.out.println("Buyer not found. Try again!");
-            }
-        } while (buyer == null);
-
-        do {
-            System.out.print("Enter seller id: ");
-            String sellerId = scanner.nextLine();
-            seller = database.findSellerById(sellerId);
-
-            if (seller == null) {
-                System.out.println("Seller not found. Try again!");
-            }
-        } while (seller == null);
-
-        Invoice invoice = new Invoice(buyer, seller, cart);
-        invoice.printInvoice();
-        database.getInvoices().add(invoice);
     }
 }

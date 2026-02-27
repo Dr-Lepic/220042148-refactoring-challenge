@@ -15,9 +15,4 @@ public class Seller extends Person implements Serializable {
     public Seller(String id) {
         super(id);
     }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 }
